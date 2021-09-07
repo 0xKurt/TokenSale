@@ -66,7 +66,9 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
 
     // @dev Emitted when saleActive changes
     event ChangedSaleActive(bool active);
-
+    
+    // @dev Emitted when minAmount changes
+    event ChangedMinAmount(uint256 minAmount);
 
     // *******************************************************************************
     //
@@ -167,43 +169,43 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
     
     // @notice Getter for te address of the contract owner
     // @return Returns address of the proxy contract owner
-    function getOwner() public view returns (address) {
+    function getOwner() public view returns(address) {
         return owner;
     }
     
-    function getExchangeRate() public view returns (uint256) {
+    function getExchangeRate() public view returns(uint256) {
         return exchangeRate;
     }
     
-    function getCurrencyAddress() public view returns (address) {
+    function getCurrencyAddress() public view returns(address) {
         return address(currency);
     }
     
-    function getExchangeTokenAddress() public view returns (address) {
+    function getExchangeTokenAddress() public view returns(address) {
         return address(exchangeToken);
     } 
     
-    function getBuyersList() public view returns (address[] memory) {
+    function getBuyersList() public view returns(address[] memory) {
         return buyersList;
     }
     
-    function getCurrencyAmount() public view returns (uint256) {
+    function getCurrencyAmount() public view returns(uint256) {
         return currencyAmount;
     }
     
-    function getSoldExchangeTokenAmount() public view returns (uint256) {
+    function getSoldExchangeTokenAmount() public view returns(uint256) {
         return soldExchangeToken;
     }
     
-    function getAmountOfExchangeToken(uint256 currencyAmount) public view returns (uint256) {
+    function getAmountOfExchangeToken(uint256 currencyAmount) public view returns(uint256) {
         return currencyAmount/100*exchangeRate;
     }
     
-    function getPriceOfExchangeToken(uint256 amount) public view returns (uint256) {
+    function getPriceOfExchangeToken(uint256 amount) public view returns(uint256) {
         return amount/exchangeRate*100;
     }
     
-    function getPurchaseMinimum() public view returns (uint256) {
+    function getPurchaseMinimum() public view returns(uint256) {
         return minAmount;
     }
     
@@ -265,5 +267,11 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
         saleActive = false;
         emit ChangedSaleActive(saleActive);
         return saleActive;
+    }
+    
+    function setMinAmount(uint256 min) public onlyOwner returns(uint256) {
+        minAmount = min;
+        emit ChangedMinAmount(min);
+        return min;
     }
 }
