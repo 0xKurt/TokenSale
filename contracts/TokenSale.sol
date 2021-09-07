@@ -4,26 +4,12 @@ import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contr
 
 // minimal ERC20 interface
 interface ERC20 {
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
-
+    function allowance(address owner, address spender) external view returns (uint256);
     function balanceOf(address account) external view returns (uint256);
-
-    function transferFrom(
-        address,
-        address,
-        uint256
-    ) external returns (bool);
-
-    function transfer(address recipient, uint256 amount)
-        external
-        returns (bool);
-
+    function transferFrom(address, address, uint256) external returns (bool);
+    function transfer(address recipient, uint256 amount) external returns (bool);
     function approve(address, uint256) external;
 }
-
 
 
 contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
@@ -88,6 +74,11 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
         _;
     }
     
+    modifier checkAvailableFunds(uint256 amount) {
+        require(currency.balanceOf(msgSender()) >= amount, 'user has not enough funds');
+        _;
+    }
+    
     modifier isSaleActive() {
         require(saleActive, 'sale is currently inactive');
         _;
@@ -102,7 +93,13 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
     // @notice function is called to buy token
     // @param amount The amount of currency token the user wants to spent in exchange for the exchangeToken
     // @return Returns the amount of exchangToken the user receives in exchange for his currency token
-    function buy(uint256 amount) public checkAllowance(amount) nonReentrant isSaleActive returns(uint256) {
+    function buy(uint256 amount) public 
+        checkAvailableFunds(amount) 
+        checkAllowance(amount) 
+        nonReentrant 
+        isSaleActive 
+    returns(uint256) {
+        
         currency.transferFrom(msgSender(), address(this), amount);
         uint256 receiveAmount = amount/100*exchangeRate;
         
