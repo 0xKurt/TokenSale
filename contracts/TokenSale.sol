@@ -11,7 +11,6 @@ interface ERC20 {
     function approve(address, uint256) external;
 }
 
-
 contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
     
     address public owner;
@@ -22,16 +21,29 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
     address[] public buyersList;
     mapping(address=>bool) isBuyer;
     
+    uint256 public minAmount;
     uint256 public exchangeRate;
+    uint256 public soldExchangeToken;
+    uint256 public currencyAmount;
     
     bool public saleActive;
     
-    constructor(string memory name, string memory version, address currencyAddress, address exchangeTokenAddress, uint256 initExchangeRate) public EIP712MetaTransaction(name, version) {
+    constructor(
+        string memory name, 
+        string memory version, 
+        address currencyAddress, 
+        address exchangeTokenAddress, 
+        uint256 initExchangeRate,
+        uint256 minimumAmount
+    ) public EIP712MetaTransaction(name, version) {
         owner = msg.sender;
         currency = ERC20(currencyAddress);
         exchangeToken = ERC20(exchangeTokenAddress);
         exchangeRate = initExchangeRate;
         saleActive = false;
+        soldExchangeToken = 0;
+        currencyAmount = 0;
+        minAmount = minimumAmount;
     }
     
     // *******************************************************************************
@@ -74,13 +86,28 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
         _;
     }
     
-    modifier checkAvailableFunds(uint256 amount) {
+    modifier checkAvailableUserFunds(uint256 amount) {
         require(currency.balanceOf(msgSender()) >= amount, 'user has not enough funds');
         _;
     }
     
     modifier isSaleActive() {
         require(saleActive, 'sale is currently inactive');
+        _;
+    }
+    
+    modifier contractHasEnoughToken(uint256 amount) {
+        require(exchangeToken.balanceOf(address(this)) >= amount, 'not enough exchangeToken left :(');
+        _;
+    }
+    
+    modifier checkPriceRatio(uint256 price, uint256 exchangeTokenAmount) {
+        require(exchangeTokenAmount == getAmountOfExchangeToken(price), 'wrong amount of exchange token for given price');
+        _;
+    }
+    
+    modifier isPurchaseMinimum(uint256 amount) {
+        require(amount >= minAmount && amount >= 100, 'the user tries to buy too few tokens');
         _;
     }
     
@@ -91,26 +118,30 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
     // *******************************************************************************
     
     // @notice function is called to buy token
-    // @param amount The amount of currency token the user wants to spent in exchange for the exchangeToken
+    // @param price The amount of currency token the user wants to spent in exchange for the exchangeToken
+    // @param exchangeTokenAmount the amount of tokens the user wants to buy
     // @return Returns the amount of exchangToken the user receives in exchange for his currency token
-    function buy(uint256 amount) public 
-        checkAvailableFunds(amount) 
-        checkAllowance(amount) 
+    function buy(uint256 price, uint256 exchangeTokenAmount) public 
         nonReentrant 
         isSaleActive 
-    returns(uint256) {
+        isPurchaseMinimum(exchangeTokenAmount)
+        checkPriceRatio(price, exchangeTokenAmount)
+        contractHasEnoughToken(exchangeTokenAmount)
+        checkAvailableUserFunds(price) 
+        checkAllowance(price) 
+        returns(uint256) 
+    {
+        currency.transferFrom(msgSender(), address(this), price);
+        currencyAmount += price;
         
-        currency.transferFrom(msgSender(), address(this), amount);
-        uint256 receiveAmount = amount/100*exchangeRate;
+        exchangeToken.transfer(msgSender(), exchangeTokenAmount);
+        soldExchangeToken += exchangeTokenAmount;   
         
-        require(exchangeToken.balanceOf(address(this)) >= receiveAmount, 'not enough exchangeToken left :(');
-        
-        exchangeToken.transfer(msgSender(), receiveAmount);
         addBuyerToList(msgSender());
         
-        emit Bought(msgSender(), amount, receiveAmount);
+        emit Bought(msgSender(), price, exchangeTokenAmount);
         
-        return receiveAmount;
+        return exchangeTokenAmount;
     }
 
     // *******************************************************************************
@@ -154,6 +185,26 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
     
     function getBuyersList() public view returns (address[] memory) {
         return buyersList;
+    }
+    
+    function getCurrencyAmount() public view returns (uint256) {
+        return currencyAmount;
+    }
+    
+    function getSoldExchangeTokenAmount() public view returns (uint256) {
+        return soldExchangeToken;
+    }
+    
+    function getAmountOfExchangeToken(uint256 currencyAmount) public view returns (uint256) {
+        return currencyAmount/100*exchangeRate;
+    }
+    
+    function getPriceOfExchangeToken(uint256 amount) public view returns (uint256) {
+        return amount/exchangeRate*100;
+    }
+    
+    function getPurchaseMinimum() public view returns (uint256) {
+        return minAmount;
     }
     
     // *******************************************************************************
@@ -215,7 +266,4 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
         emit ChangedSaleActive(saleActive);
         return saleActive;
     }
-    
-    
-    
 }
