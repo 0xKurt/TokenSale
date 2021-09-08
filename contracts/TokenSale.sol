@@ -1,6 +1,6 @@
 pragma solidity ^0.8.2;
-import 'https://github.com/KurtMerbeth/metatx-standard/blob/master/contracts/EIP712MetaTransaction.sol';
-import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/security/ReentrancyGuard.sol';
+import './metatx-standard/EIP712MetaTransaction.sol';
+import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 // minimal ERC20 interface
 interface ERC20 {
@@ -197,16 +197,20 @@ contract TokenSale is EIP712MetaTransaction, ReentrancyGuard {
         return soldExchangeToken;
     }
     
-    function getAmountOfExchangeToken(uint256 currencyAmount) public view returns(uint256) {
-        return currencyAmount/100*exchangeRate;
+    function getAmountOfExchangeToken(uint256 amount) public view returns(uint256) {
+        return amount*exchangeRate/100;
     }
     
     function getPriceOfExchangeToken(uint256 amount) public view returns(uint256) {
-        return amount/exchangeRate*100;
+        return amount*100/exchangeRate;
     }
     
     function getPurchaseMinimum() public view returns(uint256) {
         return minAmount;
+    }
+    
+    function getSaleActive() public view returns (bool) {
+        return saleActive;
     }
     
     // *******************************************************************************
