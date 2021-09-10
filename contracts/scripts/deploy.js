@@ -34,7 +34,7 @@ const main = async () => {
   );
 
   console.log('Deployer address: ' + deployer.address);
-  console.log('Deployers balance: ' + await deployer.getBalance());
+  console.log('Deployer balance: ' + await deployer.getBalance());
   console.log('Network id: ' + deployer.provider._network.chainId)
   console.log('Network: ' + deployer.provider._network.name)
   console.log()
@@ -43,6 +43,8 @@ const main = async () => {
 
   const tokenData = {
     Token: {
+      name: tokenName,
+      symbol: tokenSymbol,
       address: exchangeToken.address,
       abi: JSON.parse(exchangeToken.interface.format('json'))
     }
@@ -52,6 +54,8 @@ const main = async () => {
 
   const saleData = {
     TokenSale: {
+      name: name,
+      version: version,
       address: tokenSale.address,
       abi: JSON.parse(tokenSale.interface.format('json'))
     }
