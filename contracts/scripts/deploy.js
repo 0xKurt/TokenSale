@@ -1,4 +1,6 @@
 const { ethers } = require("hardhat");
+const { utils } = require("ethers");
+const fs = require('fs');
 
 let tokenFactory, tokenSaleFactory;
 let exchangeToken, tokenSale;
@@ -16,7 +18,7 @@ let exchangeRate = 100; // in %
 let currencyAddress = '0xc7ad46e0b8a400bb3c915120d284aafba8fc4735'; // rinkeby testdai
 
 const main = async () => {
-  const [deployer] = await ethers.getSigner();
+  const [deployer, _] = await ethers.getSigners();
 
   tokenFactory = await ethers.getContractFactory('StandardToken');
   exchangeToken = await tokenFactory.deploy(tokenName, tokenSymbol, initSupply);
@@ -31,9 +33,31 @@ const main = async () => {
     purchaseMinimum
   );
 
-  console.log('Deployer address: '+deployer);
-  console.log('Exchange token ('+tokenSymbol+') address: '+exchangeToken.address);
-  console.log('TokenSale address: '+tokenSale.address);
+  console.log('Deployer address: ' + deployer.address);
+  console.log('Deployers balance: ' + await deployer.getBalance());
+  console.log('Network id: ' + deployer.provider._network.chainId)
+  console.log('Network: ' + deployer.provider._network.name)
+  console.log()
+  console.log('Exchange token (' + tokenSymbol + ') address: ' + exchangeToken.address);
+  console.log('TokenSale address: ' + tokenSale.address);
+
+  const tokenData = {
+    Token: {
+      address: exchangeToken.address,
+      abi: JSON.parse(exchangeToken.interface.format('json'))
+    }
+  };
+
+  fs.writeFileSync('../frontend/src/data/contracts/Token.json', JSON.stringify(tokenData));
+
+  const saleData = {
+    TokenSale: {
+      address: tokenSale.address,
+      abi: JSON.parse(tokenSale.interface.format('json'))
+    }
+  };
+
+  fs.writeFileSync('../frontend/src/data/contracts/TokenSale.json', JSON.stringify(saleData));
 }
 
 

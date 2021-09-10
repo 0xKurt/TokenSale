@@ -1,4 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
+require('dotenv').config()
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -23,7 +24,7 @@ module.exports = {
       url: `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`,
       accounts: ['0x'+process.env.WALLET_PRIVATE_KEY]
     },
-    mainnet = {
+    mainnet: {
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
       accounts: ['0x'+process.env.WALLET_PRIVATE_KEY]
     }
