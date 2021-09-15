@@ -1,4 +1,3 @@
-import { BICONOMY, BICONOMY_KEY, INFURA_API_KEY, PORTIS_KEY } from '../config';
 import { Biconomy } from "@biconomy/mexa";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
@@ -13,7 +12,7 @@ import useConnectedNetworkId from './useConnectedNetworkId'
 import useConnectedNetworkName from './useConnectedNetworkName'
 
 import { getChainName } from '../utils/networks';
-import useTriggerEvent from './internal/useTriggerEvent';
+import { useReadState } from ".";
 
 let _provider = '';
 let _web3 = '';
@@ -26,7 +25,11 @@ const useWeb3Modal = () => {
   const { web3, setWeb3 } = useConnectedWeb3();
   const { networkId, setNetworkId } = useConnectedNetworkId();
   const { networkName, setNetworkName } = useConnectedNetworkName();
-  const { event, trigger } = useTriggerEvent();
+
+  const BICONOMY = useReadState('biconomy')
+  const BICONOMY_KEY = useReadState('biconomy_key')
+  const INFURA_API_KEY = useReadState('infura')
+  const PORTIS_KEY = useReadState('portis')
 
   const providerOptions = {
     // Example with injected _providers

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useCallContract, useEmptyWeb3 } from ".";
-import { fromWeiToFixed, isAddress, toFixed5 } from "../utils/func";
+import { useCallContract } from ".";
+import { fromWeiToFixed, isAddress } from "../utils/func";
 import useTriggerEvent from './internal/useTriggerEvent'
 import Erc20Abi from '../utils/Erc20Abi.json'
 

@@ -1,4 +1,4 @@
-import React, {createContext, useReducer} from "react";
+import React, { createContext, useReducer } from "react";
 import Reducer from './Reducer';
 
 const initialState = {
@@ -10,13 +10,13 @@ const initialState = {
     event: true,
 };
 
-const Web3Wrapper = ({children}) => {
-  const [state, dispatch] = useReducer(Reducer, initialState);
-  return (
-      <Context.Provider value={[state, dispatch]}>
-          {children}
-      </Context.Provider>
-  )
+const Web3Wrapper = (props) => {
+    const [state, dispatch] = useReducer(Reducer, { ...initialState, ...props.config });
+    return (
+        <Context.Provider value={[state, dispatch]}>
+            {props.children}
+        </Context.Provider>
+    )
 };
 
 export const Context = createContext(initialState);

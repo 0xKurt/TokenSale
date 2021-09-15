@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import Web3 from 'web3'
-import { RPCURL } from '../../config';
+import { useReadState } from '..';
 
 const useEmptyWeb3 = () => {
-  const [web3, setWeb3] = useState(new Web3(RPCURL))
+  const rpc = useReadState('rpc')
+  const [web3, setWeb3] = useState(new Web3(rpc))
   return (
     web3
   );

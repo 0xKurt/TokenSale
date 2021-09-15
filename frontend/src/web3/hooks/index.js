@@ -12,7 +12,6 @@ import useCallContract from "./useCallContract";
 import useWeb3Modal from "./useWeb3Modal";
 import useSendTransaction from "./useSendTransaction";
 
-
 export {
   useConnectedWeb3,
   useConnectedProvider,

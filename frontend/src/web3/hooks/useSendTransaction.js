@@ -1,12 +1,9 @@
 import { ethers } from "ethers";
-import { emit } from "process";
 import { useState } from "react";
 import { useConnectedAccount, useConnectedWeb3, useTriggerEvent } from ".";
 const emitter = require('events').EventEmitter;
 
 const useSendTransaction = () => {
-  const [sendResult, setSendResult] = useState('');
-  const [status, setStatus] = useState('');
   const { web3, } = useConnectedWeb3();
   const { account, } = useConnectedAccount();
   const { event, trigger } = useTriggerEvent();
@@ -45,12 +42,15 @@ const useSendTransaction = () => {
         })
         .on("error" || "Error", async (error) => {
           e.emit('error', error)
+          await web3.eth.clearSubscriptions()
         })
-        .catch(error => {
+        .catch(async error => {
           e.emit('error', error)
+          await web3.eth.clearSubscriptions()
         })
     } else {
       e.emit('error', 'user not connected')
+      web3.eth.clearSubscriptions()
     }
     return e;
   }

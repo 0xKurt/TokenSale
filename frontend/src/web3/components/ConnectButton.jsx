@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
-import { useConnectedAccount, useConnectedNetworkId, useConnectedNetworkName, useConnectedProvider } from '../hooks';
+import { useConnectedAccount, useConnectedNetworkId, useConnectedNetworkName, useConnectedProvider, useReadState } from '../hooks';
 import useWeb3Modal from '../hooks/useWeb3Modal';
-import { Button, Tooltip, OverlayTrigger } from 'react-bootstrap'
 import { BsGrid } from 'react-icons/bs'
-import { IconContext } from "react-icons";
 import { getChainName } from '../utils/networks';
 import GeneralButton from './internal/GeneralButton';
 
@@ -28,8 +26,10 @@ const ConnectButton = (props) => {
   const { networkName, setNetworkName } = useConnectedNetworkName();
   const { provider, } = useConnectedProvider();
   const { connect, reconnect } = useWeb3Modal();
+  const network = useReadState('network')
 
   useEffect(() => {
+    console.log(provider)
     if (provider) {
       // Subscribe to accounts change
       provider.on("accountsChanged", (accounts) => {
@@ -65,9 +65,9 @@ const ConnectButton = (props) => {
           color={props.color ? props.colorConnect : 'dodgerblue'}
           backgroundColor={props.backgroundColorConnect ? props.backgroundColorConnect : 'white'}
           hoverColor={props.hoverColorConnect ? props.hoverColorConnect : '#fafafa'}
-          caption={networkId != props.network && <><span>{props.language == 'de' ? 'Bitte verbinde dich mit ' : 'Please connect to '}</span><span style={{ marginLeft: '2px', fontWeight: '800', color: props.color ? props.colorConnect : 'dodgerblue' }}>{getChainName(props.network)}</span></>}
+          caption={networkId != network && <><span>{props.language == 'de' ? 'Bitte verbinde dich mit ' : 'Please connect to '}</span><span style={{ marginLeft: '2px', fontWeight: '800', color: props.color ? props.colorConnect : 'dodgerblue' }}>{getChainName(network)}</span></>}
         />}
-      {account && networkId == props.network &&
+      {account && networkId == network &&
         <GeneralButton
           onClick={reconnect}
           text={account.toLowerCase().substring(0, 6) + ' ... ' + account.toLowerCase().substring(37,)}
@@ -79,14 +79,14 @@ const ConnectButton = (props) => {
           icon={<BsGrid />}
           tooltip={props.language == 'de' ? 'Neu verbinden' : 'Reconnect'}
         />}
-      {account && networkId != props.network &&
+      {account && networkId != network &&
         <GeneralButton
           onClick={reconnect}
           text={account.toLowerCase().substring(0, 6) + ' ... ' + account.toLowerCase().substring(37,)}
           color={props.colorWrong ? props.colorWrong : 'indianred'}
           backgroundColor={props.backgroundColorWrong ? props.backgroundColorWrong : 'white'}
           hoverColor={props.hoverColorWrong ? props.hoverColorWrong : '#b84040'}
-          caption={<><span style={{ color: props.colorWrong ? props.colorWrong : 'indianred' }}>&#10004; </span> <span>{props.language == 'de' ? 'Bitte verbinde dich mit ' : 'Please connect to '}</span><span style={{ marginLeft: '2px', fontWeight: '800', color: props.colorWrong ? props.colorWrong : 'indianred' }}>{getChainName(props.network)}</span></>}
+          caption={<><span style={{ color: props.colorWrong ? props.colorWrong : 'indianred' }}>&#10004; </span> <span>{props.language == 'de' ? 'Bitte verbinde dich mit ' : 'Please connect to '}</span><span style={{ marginLeft: '2px', fontWeight: '800', color: props.colorWrong ? props.colorWrong : 'indianred' }}>{getChainName(network)}</span></>}
           split={true}
           icon={<BsGrid />}
           tooltip={props.language == 'de' ? 'Neu verbinden' : 'Reconnect'}
